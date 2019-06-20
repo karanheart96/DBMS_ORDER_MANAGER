@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <meta name="description" content="OrderManager Database : Project using Apache Derby for CS 5200">
+
+    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
+
+    <title>OrderManager Database</title>
+  </head>
+
+  <body>
+
+    <!-- HEADER -->
+    <div id="header_wrap" class="outer">
+        <header class="inner">
+          <a id="forkme_banner" href="https://github.ccs.neu.edu/wukai/CS5200-Project">View on GitHub</a>
+
+          <h1 id="project_title">OrderManager Database</h1>
+          <h2 id="project_tagline">Project using Apache Derby for CS 5200</h2>
+
+        </header>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div id="main_content_wrap" class="outer">
+      <section id="main_content" class="inner">
+        <h1>
+<a id="ordermanager-database" class="anchor" href="#ordermanager-database" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>OrderManager Database</h1>
+<p>Authors: Karan Machado (<a class="user-mention" data-hovercard-user-id="4914" data-octo-click="hovercard-link-click" data-octo-dimensions="link_type:self" href="https://github.ccs.neu.edu/karan1511">@karan1511</a>) and Kai Wu (<a class="user-mention" data-hovercard-user-id="4190" data-octo-click="hovercard-link-click" data-octo-dimensions="link_type:self" href="https://github.ccs.neu.edu/wukai">@wukai</a>)</p>
+<h2>
+<a id="overview" class="anchor" href="#overview" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Overview</h2>
+<p>OrderManager is written in Java 1.8 and is a relational database management system using Apache Derby. The database contains information about customers, products, inventory records, orders, and order records. The code here provides a foundation for a back-end for an application for managing products, product inventory, and customer orders for an online store. It keeps tracks of inventory for each product and orders placed by customers.</p>
+<h2>
+<a id="usage" class="anchor" href="#usage" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Usage</h2>
+<p>OrderManager class contains initialization of the database by creating instances of the other classes to handle connecting to the database, DDL, DML, and DQL. An instance of the API class is also created in OrderManager, enabling function calls to API methods. Currently, OrderManager is meant to test functionality of these other classes.</p>
+<h2>
+<a id="tables" class="anchor" href="#tables" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Tables</h2>
+<h3>
+<a id="product" class="anchor" href="#product" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>product</h3>
+<p>The product table represents a product in the database. A product has a vendor product SKU that uniquely identifies it, as well as a name and a description. Has a 1-to-1 relationship with inventory_record.</p>
+<table>
+<thead>
+<tr>
+<th>Column ID</th>
+<th>Column</th>
+<th>Data Type</th>
+<th>Constraints</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>product_name</td>
+<td>VARCHAR(32)</td>
+<td>Not null</td>
+<td>Represents the product's name as a string of up to 32 characters.</td>
+</tr>
+<tr>
+<td>2</td>
+<td>product_description</td>
+<td>VARCHAR(1000)</td>
+<td>Not null</td>
+<td>Contains the description of the product. Holds up to 1000 characters.</td>
+</tr>
+<tr>
+<td>3</td>
+<td><strong>product_SKU</strong></td>
+<td>VARCHAR(12)</td>
+<td>Not null</td>
+<td>Primary key for the product table. Contains the vendor product SKU that identifies the product. The SKU is a 12-character value of the form "AA-NNNNNN-CC", where A is an upper-case letter, N is a digit from 0-9, and C is either a digit or an upper case letter. Example of a valid SKU: "AB-123456-0C". Validity of the SKU is checked by the stored function isSKU() defined by DBMS_storedfunc.java.</td>
+</tr>
+</tbody>
+</table>
+<h3>
+<a id="inventory_record" class="anchor" href="#inventory_record" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>inventory_record</h3>
+<p>The inventory_record table represents available inventory in the store. For each product, the inventory_record keeps track of the price and number of available units to order. Has a 1-to-1 relationship with product. This table is checked when an order is placed to make sure the number of units ordered is valid, and to get the price for that product.</p>
+<table>
+<thead>
+<tr>
+<th>Column ID</th>
+<th>Column</th>
+<th>Data Type</th>
+<th>Constraints</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><strong>product_SKU</strong></td>
+<td>VARCHAR(12)</td>
+<td>Not null</td>
+<td>Primary key for inventory_record. Also a foreign key that references product_SKU in the product table. When product_SKU is deleted from product_SKU, rows with matching product_SKU in inventory_record will also be deleted. The product_SKU uniquely identifies the product and is a 12-character value of the form "AA-NNNNNN-CC", where A is an upper-case letter, N is a digit from 0-9, and C is either a digit or an upper case letter. Example of a valid SKU: "AB-123456-0C".</td>
+</tr>
+<tr>
+<td>2</td>
+<td>no_of_units</td>
+<td>INTEGER</td>
+<td>Not null, must be greater than or equal to 0</td>
+<td>Represents the number of available units for the product in the inventory. The constraint is checked by the stored function isUnit() which is defined by DBMS_storedfunc.java.</td>
+</tr>
+<tr>
+<td>3</td>
+<td>price_per_unit</td>
+<td>DECIMAL(7,2)</td>
+<td>Not null, must be greater than or equal to 0</td>
+<td>Represents the price (in USD) per unit of the product. The constraint is checked by the stored function isPrice() which is defined by DBMS_storedfunc.java.</td>
+</tr>
+</tbody>
+</table>
+<h3>
+<a id="customer" class="anchor" href="#customer" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>customer</h3>
+<p>The customer table represents the customers, each uniquely indentified by an automatically generated customer id. The customer table contains the customer's name and address, and does not contain any payment information. Has a 1-to-many relationship with the orders table.</p>
+<table>
+<thead>
+<tr>
+<th>Column ID</th>
+<th>Column</th>
+<th>Data Type</th>
+<th>Constraints</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><strong>CUST_ID</strong></td>
+<td>INTEGER</td>
+<td>Not null</td>
+<td>Primary key for customer. Automatically generated starting at 1, incrementing by 1. Uniquely identifies a customer.</td>
+</tr>
+<tr>
+<td>2</td>
+<td>GivenName</td>
+<td>VARCHAR(32)</td>
+<td>Not null</td>
+<td>Represents the customer's given name, holding up to 32 characters.</td>
+</tr>
+<tr>
+<td>3</td>
+<td>FamilyName</td>
+<td>VARCHAR(32)</td>
+<td>Not null</td>
+<td>Represents the customer's family name, holding up to 32 characters.</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Address</td>
+<td>VARCHAR(64)</td>
+<td>Not null</td>
+<td>Contains the street address for the customer, holding up to 64 characters.</td>
+</tr>
+<tr>
+<td>5</td>
+<td>City</td>
+<td>VARCHAR(64)</td>
+<td>Not null</td>
+<td>Contains the city of the address for the customer, holding up to 64 characters.</td>
+</tr>
+<tr>
+<td>6</td>
+<td>State</td>
+<td>VARCHAR(4)</td>
+<td>Not null, if country is US, checks if valid US state</td>
+<td>Contains the abbreviated form of the state of the customer, holding up to 4 characters. If the state lies within the US, it is checked by the stored function isState() defined by DBMS_storedfunc.java to ensure it is a valid US state.</td>
+</tr>
+<tr>
+<td>7</td>
+<td>ZipCode</td>
+<td>VARCHAR(16)</td>
+<td>Not null, if country is US, checks if valid US zipcode</td>
+<td>Contains the zip code for the address of the customer as a string. Can contain 5 digits or the complete 9 digit zip code. If the country is the US, it is checked by the stored function isZipCode() defined by DBMS_storedfunc.java to ensure it is a valid US zip code.</td>
+</tr>
+<tr>
+<td>8</td>
+<td>Country</td>
+<td>VARCHAR(32)</td>
+<td>Not null, checks if valid country</td>
+<td>Contains the country for the address of the customer, holding up to 32 characters. Checks if the country is a valid country by using the stored function isCountry() which is defined by DBMS_storedfunc.java.</td>
+</tr>
+</tbody>
+</table>
+<h3>
+<a id="orders" class="anchor" href="#orders" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>orders</h3>
+<p>The orders table represents an order that is placed. Each order has an automatically generated order id, and an customer id that references the customer who placed that order. The table also contains the date of the order and date of shipment if the order has been shipped. The orders table does not contain information about what products are ordered, which is kept track of by the order_record table. It has a many-to-1 relationship with customer, and a 1-to-many relationship with order_record.</p>
+<table>
+<thead>
+<tr>
+<th>Column ID</th>
+<th>Column</th>
+<th>Data Type</th>
+<th>Constraints</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><strong>order_id</strong></td>
+<td>INTEGER</td>
+<td>Not null</td>
+<td>Primary key for the order table. Automatically generated, starting at 1 and incrementing by 1. Uniquely identifies an order.</td>
+</tr>
+<tr>
+<td>2</td>
+<td>order_date</td>
+<td>DATE</td>
+<td>Not null</td>
+<td>Holds the date the order was created.</td>
+</tr>
+<tr>
+<td>3</td>
+<td>shipment_date</td>
+<td>DATE</td>
+<td>None</td>
+<td>Holds the date the order was shipped. If not yet shipped, the field is null.</td>
+</tr>
+<tr>
+<td>4</td>
+<td>CUSTOMER_ID</td>
+<td>INTEGER</td>
+<td>Not null</td>
+<td>Foreign key that references CUST_ID from the customer table. Represents which customer placed the order. If a customer is deleted from the customer table, all orders corresponding to that customer are deleted as well.</td>
+</tr>
+</tbody>
+</table>
+<h3>
+<a id="order_record" class="anchor" href="#order_record" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>order_record</h3>
+<p>The order_record table contains information about an order, where each row of the table represents a product that has been ordered. The order_id column specifies what order, and the product_SKU column specifies what product was ordered. The order_record table also provides information on the number of units ordered and the price per unit at the time of order. It has a many-to-1 relationship with orders table.</p>
+<table>
+<thead>
+<tr>
+<th>Column ID</th>
+<th>Column</th>
+<th>Data Type</th>
+<th>Constraints</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>order_id</td>
+<td>INTEGER</td>
+<td>Not null</td>
+<td>Foreign key that references the order_id from the orders table. When an order is deleted from orders table, the corresponding order records are deleted from this table using order_id.</td>
+</tr>
+<tr>
+<td>2</td>
+<td>no_of_units</td>
+<td>INTEGER</td>
+<td>Not null, greater than or equal to 0</td>
+<td>Represents the ordered number of units for the product. Constraint is checked by the stored function isUnit() defined by DBMS_storedfunc.java.</td>
+</tr>
+<tr>
+<td>3</td>
+<td>price_per_unit</td>
+<td>DECIMAL(7,2)</td>
+<td>Not null, greater than or equal to 0</td>
+<td>Represents the price per unit of the ordered product. Constraint is checked by the stored function isPrice() defined by DBMS_storedfunc.java.</td>
+</tr>
+<tr>
+<td>4</td>
+<td>product_SKU</td>
+<td>VARCHAR(12)</td>
+<td>Not null</td>
+<td>Foreign key that references the product_SKU from the product table. The no_of_units and price_per_unit refer to the product specified by this product_SKU.</td>
+</tr>
+</tbody>
+</table>
+<h2>
+<a id="classes" class="anchor" href="#classes" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Classes</h2>
+<h3>
+<a id="ordermanager" class="anchor" href="#ordermanager" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>OrderManager</h3>
+<p>Initializes the database and functions from other classes should be called in main.
+Holds information about the database as private variables accessible to itself, with crucial
+ones passed as parameters to other functions (most notably: Statement s and Connection conn).</p>
+<h3>
+<a id="ordermanager_connection" class="anchor" href="#ordermanager_connection" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>OrderManager_Connection</h3>
+<p>Establishes connection to the database and handles closing it. Should not need any changes or additions.</p>
+<h3>
+<a id="ordermanager_ddl" class="anchor" href="#ordermanager_ddl" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>OrderManager_DDL</h3>
+<p>Has functions to create all tables, triggers, and functions (and procedures, but we do not have any right now).
+Also has functions to drop tables, triggers, and functions (and procedures, if we add any).
+This is where we should edit if we want to change how tables are created, modify domain constraints, etc.</p>
+<h3>
+<a id="ordermanager_dml" class="anchor" href="#ordermanager_dml" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>OrderManager_DML</h3>
+<p>Handles insert, alter, and delete. Has functions to insert for customer, product, and inventory_record.
+Will also truncate all tables to clear them of data.</p>
+<h3>
+<a id="ordermanager_dql" class="anchor" href="#ordermanager_dql" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>OrderManager_DQL</h3>
+<p>Contains functions that select for certain rows. Functions could use more work, particularly in modularizing them so that they don't just print to standard out (returning results in some way would be useful, especially if API could call on these functions directly). Useful functions that maybe should be in API are the selectAllAvailableProducts() and selectAllCustomerOrders() which display product names and inventory information and all orders of a specified customer, respectively.</p>
+<h3>
+<a id="ordermanager_api" class="anchor" href="#ordermanager_api" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>OrderManager_API</h3>
+<p>Contains functions that should be primarily called upon by a user to interact with the database. Current functionality includes creating a customer, creating an order and order record for a specified customer, creating a product, and getting the total cost of a specific order.</p>
+<h3>
+<a id="dbms_storedfunc" class="anchor" href="#dbms_storedfunc" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>DBMS_storedfunc</h3>
+<p>Contains stored functions used by the OrderManager_DDL class when creating constraints. Does not need any more additions or changes.</p>
+      </section>
+    </div>
+
+    <!-- FOOTER  -->
+    <div id="footer_wrap" class="outer">
+      <footer class="inner">
+        <p class="copyright">OrderManager Database maintained by <a href="https://github.ccs.neu.edu/wukai">wukai</a></p>
+        <p>Published with <a href="https://pages.github.com">GitHub Pages</a></p>
+      </footer>
+    </div>
+
+    
+
+  </body>
+</html>
