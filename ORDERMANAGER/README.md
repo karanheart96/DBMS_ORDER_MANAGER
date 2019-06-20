@@ -1,4 +1,4 @@
-**GitHub Page:** https://pages.github.ccs.neu.edu/wukai/CS5200-Project/
+
 
 # OrderManager Database
 Authors: Karan Machado (@karan1511) and Kai Wu (@wukai)
