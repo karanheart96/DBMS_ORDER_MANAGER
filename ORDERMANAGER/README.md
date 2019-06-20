@@ -1,7 +1,7 @@
 
 
 # OrderManager Database
-Authors: Karan Machado (@karan1511) and Kai Wu (@wukai)
+Authors: Karan Machado 
 
 ## Overview
 OrderManager is written in Java 1.8 and is a relational database management system using Apache Derby. The database contains information about customers, products, inventory records, orders, and order records. The code here provides a foundation for a back-end for an application for managing products, product inventory, and customer orders for an online store. It keeps tracks of inventory for each product and orders placed by customers.  
